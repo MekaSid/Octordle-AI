@@ -50,6 +50,13 @@ class OctordleUI:
 
         self.submit_button = tk.Button(master, text="Submit Guess", command=self.submit_guess, font=('Helvetica', 14))
         self.submit_button.grid(row=0, column=8, columnspan=2)
+        
+        #3D feedback array
+        self.feedback_array_all_guess = [None for _ in range(13)]
+        self.feedback_array_current_guess = [[None for _ in range(5)] for _ in range(8)]
+
+
+
 
     def submit_guess(self):
         guess = self.input_field.get().upper()
@@ -59,27 +66,30 @@ class OctordleUI:
         if len(guess) == 5 and self.current_guess_index < 13:
             for word_index, target_word in enumerate(self.target_words):
                 if not self.solved_boards[word_index]:  # Only update if not already solved
-                    correct = self.update_guess(word_index, self.current_guess_index, guess, target_word)
-                    if correct:
-                        self.solved_boards[word_index] = True  # Mark as solved
-                        # Fill the remaining labels with the background color to indicate solved
-                        for i in range(self.current_guess_index + 1, 13):
-                            for j in range(5):
-                                self.guess_labels[word_index][i][j].config(bg="#3a3a3c", fg="#3a3a3c")
+                    self.update_guess(word_index, self.current_guess_index, guess, target_word)
             self.current_guess_index += 1
+        #print(self.feedback_array_current_guess)
+        print(self.feedback_array_all_guess)
+
+
 
     def update_guess(self, word_index, guess_index, guess, target_word):
         correct_guess = True
         for i, char in enumerate(guess):
             if char == target_word[i]:
                 correct_color = self.colors["correct"]
+                feedback = [char, 3]
             elif char in target_word:
                 correct_color = self.colors["present"]
                 correct_guess = False  # Part of the word, but wrong position
+                feedback = [char,2]
             else:
                 correct_color = self.colors["absent"]
                 correct_guess = False  # Not in the word at all
+                feedback = [char, 1]
             self.guess_labels[word_index][guess_index][i].config(text=char, bg=correct_color, fg="white")
+            self.feedback_array_current_guess[word_index][i] = feedback
+        self.feedback_array_all_guess[guess_index] = self.feedback_array_current_guess 
         return correct_guess and guess == target_word
 
 
