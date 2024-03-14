@@ -118,8 +118,13 @@ class General_Solver():
 		max_info_guesses = sorted(full_info_list, key = lambda x: x[1], reverse = True)
 		print([f"{General_Solver.to_word(w[0])}: {w[1]:.2f}" for w in max_info_guesses[0:10]])
 		new_guess = max(full_info_list, key = lambda x: x[1])
-		print(new_guess)
-		new_word_guess = General_Solver.to_word(new_guess[0])
+	
+		print(new_guess[1])
+		if (self.game.current_guess_index > 0 and new_guess[1] < 4): #set a threshold of score from when we can start guessing
+			print("low score")
+			new_word_guess = General_Solver.to_word(new_guess[0])
+		else:
+			new_word_guess = General_Solver.to_word(new_guess[0])
 		print(new_word_guess)
 
 		## break back to UI to submit guess
