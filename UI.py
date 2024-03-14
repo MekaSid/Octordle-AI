@@ -1,18 +1,22 @@
 import tkinter as tk
 import json
 import random
+from general_solver import General_Solver
+from Octordle_Website_Game import Octordle_Website_Game
+import copy
 
 class OctordleUI:
     def __init__(self, master):
         self.master = master
         master.title('Octordle Game')
 
-        file_path = 'five_letter_words.json'
+        file_path = 'answers.txt'
 
         with open(file_path, 'r') as file:
-            self.target_words = json.load(file)
+            self.target_words = file.read().splitlines()
 
         self.target_words = random.sample(self.target_words, 8)
+        print(self.target_words)
 
         # Define target words for testing
         # self.target_words = ["APPLE", "BERRY", "CHERR", "DATES", "ELDER", "FIGGY", "GRAPE", "HONEY"]
@@ -31,7 +35,7 @@ class OctordleUI:
         # Create frames for each word's guesses and separators
         self.frames = [tk.Frame(master, width=100, height=600) for _ in range(8)]
         for index, frame in enumerate(self.frames):
-            frame.grid(row=1, column=index * 2)
+            frame.grid(row=1, column=index * 2, padx=(5, 0), pady=5, sticky="nsew")
             if index < 7:  # Add separators between sections but not after the last one
                 separator = tk.Frame(master, width=2, height=600, bg="black")
                 separator.grid(row=1, column=index * 2 + 1, sticky="ns")
@@ -46,15 +50,21 @@ class OctordleUI:
 
         # Add input field and submit button
         self.input_field = tk.Entry(master, width=10, font=('Helvetica', 16))
-        self.input_field.grid(row=0, column=0, columnspan=8)
+        self.input_field.grid(row=0, column=0, columnspan=8, padx=5, pady=5)
 
         self.submit_button = tk.Button(master, text="Submit Guess", command=self.submit_guess, font=('Helvetica', 14))
-        self.submit_button.grid(row=0, column=8, columnspan=2)
+        self.submit_button.grid(row=0, column=8, columnspan=2, padx=5, pady=5)
+
+        ## Use General_Solver to come up with appropriate words
         
-        #3D feedback array
+        # 3D feedback array
         self.feedback_array_all_guess = [None for _ in range(13)]
         self.feedback_array_current_guess = [[None for _ in range(5)] for _ in range(8)]
 
+        # Get the guess
+        #self.octordle = Octordle_Website_Game()
+        self.solver = General_Solver(game=self)
+        self.solver.live_play_ultra()
 
 
 
@@ -66,14 +76,23 @@ class OctordleUI:
         if len(guess) == 5 and self.current_guess_index < 13:
             for word_index, target_word in enumerate(self.target_words):
                 if not self.solved_boards[word_index]:  # Only update if not already solved
-                    self.update_guess(word_index, self.current_guess_index, guess, target_word)
+                    # Update the guess only if the board is not already solved
+                    if self.update_guess(word_index, self.current_guess_index, guess, target_word):
+                        self.solved_boards[word_index] = True  # Mark the board as solved
             self.current_guess_index += 1
-        #print(self.feedback_array_current_guess)
-        print(self.feedback_array_all_guess)
+            if self.check_board_solved():
+                self.display_congratulations()
+            elif self.current_guess_index >= 13:
+                self.display_failure()
 
-
+        feedback = self.feedback_array_all_guess[self.current_guess_index - 1]
+        self.solver.hi()
+        self.solver.add_to_encoded_guesses(feedback)
+        self.solver.live_play_ultra()
 
     def update_guess(self, word_index, guess_index, guess, target_word):
+        target_word = target_word.lower()
+        guess = guess.lower()
         correct_guess = True
         for i, char in enumerate(guess):
             if char == target_word[i]:
@@ -88,9 +107,22 @@ class OctordleUI:
                 correct_guess = False  # Not in the word at all
                 feedback = [char, 1]
             self.guess_labels[word_index][guess_index][i].config(text=char, bg=correct_color, fg="white")
+            #encoded guesses changing here
             self.feedback_array_current_guess[word_index][i] = feedback
-        self.feedback_array_all_guess[guess_index] = self.feedback_array_current_guess 
+        self.feedback_array_all_guess[guess_index] = copy.deepcopy(self.feedback_array_current_guess)
         return correct_guess and guess == target_word
+
+    def check_board_solved(self):
+        return all(self.solved_boards)
+    
+    def display_congratulations(self):
+        congrats_label = tk.Label(self.master, text="Congratulations! You solved Octordle in {} guesses.".format(self.current_guess_index), font=('Helvetica', 20))
+        congrats_label.grid(row=5, column=0, columnspan=20, sticky="nsew")
+    
+    def display_failure(self):
+        failure_label = tk.Label(self.master, text="You failed to solve Octordle.", font=('Helvetica', 20))
+        failure_label.grid(row=5, column=0, columnspan=20, sticky="nsew")
+
 
 
 # Create the Tkinter application

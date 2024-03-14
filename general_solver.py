@@ -1,16 +1,23 @@
 import numpy as np, json, string
+from Quordle_Website_Game import Quordle_Website_Game
+
+encoded_guesses = None
 
 class General_Solver():
-	def __init__(self, dict_path, game, num_game_boards, debug = False, end_with_close = False):
+	def __init__(self, game = None, num_game_boards = 8, dict_path = 'five_letter_words.json',debug = False, end_with_close = False):
 
-
+		## Have UI invoke this method while passing in turns
 		self.game = game
+
+		self.turns = 0
 
 		self.num_game_boards = num_game_boards
 
 		self.debug = debug
-		self.encoded_guesses = [[] for i in range(num_game_boards)]
 
+		global encoded_guesses
+		self.encoded_guesses = [[] for i in range(num_game_boards)]
+		
 		# Alphabet Encoding Dictionary
 		self.letter_dict = dict((a, i) for i, a in enumerate(string.ascii_lowercase))
 
@@ -21,6 +28,14 @@ class General_Solver():
 		# For Optimized Performance
 		self.ultra_instinct = True
 		self.end_with_close = end_with_close
+
+	def hi(self):
+		print("hi")
+
+	def add_to_encoded_guesses(self, feedback):
+		for i in range(self.num_game_boards):
+			self.encoded_guesses[i].append(feedback[i])
+		return
 
 	def execute_final_guesses(self, game_boards):
 		"""
@@ -67,15 +82,27 @@ class General_Solver():
 		"""
 		final_turns = False
 		done = False
-		while (not final_turns) and (not done):
+		#while (not final_turns) and (not done):
 
-			if self.debug:
-				inp = input("Continue")
+		if self.debug:
+			inp = input("Continue")
 
-			full_info_list = [[v, 0.0] for v in self.vocab]
+		full_info_list = [[v, 0.0] for v in self.vocab]
 
-			if self.game.turn == 0:
-				state = self.get_state(self.encoded_guesses[0])
+		if self.game.current_guess_index == 0:
+			state = self.get_state(self.encoded_guesses[0])
+			vocabs = General_Solver.vocab_filter_total(state, self.vocab, self.pos_vocab)
+			zero_out_states = General_Solver.get_zero_out_state(state)
+			vocab_dist = General_Solver.get_vocab_distribution(vocabs[0])
+			position_dist = General_Solver.get_position_distribution(vocabs[1])
+			new_vocab_dist = vocab_dist * zero_out_states[0]
+			new_position_dist = position_dist * zero_out_states[1]
+			print(vocabs[0].shape)
+			full_info_list = General_Solver.word_information(self.vocab, new_vocab_dist, new_position_dist, state)
+		else:
+			for i in range(self.num_game_boards):
+				print(i)
+				state = self.get_state(self.encoded_guesses[i])
 				vocabs = General_Solver.vocab_filter_total(state, self.vocab, self.pos_vocab)
 				zero_out_states = General_Solver.get_zero_out_state(state)
 				vocab_dist = General_Solver.get_vocab_distribution(vocabs[0])
@@ -83,43 +110,40 @@ class General_Solver():
 				new_vocab_dist = vocab_dist * zero_out_states[0]
 				new_position_dist = position_dist * zero_out_states[1]
 				print(vocabs[0].shape)
-				full_info_list = General_Solver.word_information(self.vocab, new_vocab_dist, new_position_dist, state)
-			else:
-				for i in range(self.num_game_boards):
-					print(i)
-					state = self.get_state(self.encoded_guesses[i])
-					vocabs = General_Solver.vocab_filter_total(state, self.vocab, self.pos_vocab)
-					zero_out_states = General_Solver.get_zero_out_state(state)
-					vocab_dist = General_Solver.get_vocab_distribution(vocabs[0])
-					position_dist = General_Solver.get_position_distribution(vocabs[1])
-					new_vocab_dist = vocab_dist * zero_out_states[0]
-					new_position_dist = position_dist * zero_out_states[1]
-					print(vocabs[0].shape)
-					info_list = General_Solver.word_information(self.vocab, new_vocab_dist, new_position_dist, state)
-					for i, info in enumerate(info_list):
-						full_info_list[i][1] += info[1] * vocabs[0].shape[0]
-						# Scaling information to vocabulary size prioritizes game boards with more words to eliminate
-			
-			max_info_guesses = sorted(full_info_list, key = lambda x: x[1], reverse = True)
-			print([f"{General_Solver.to_word(w[0])}: {w[1]:.2f}" for w in max_info_guesses[0:10]])
-			new_guess = max(full_info_list, key = lambda x: x[1])
+				info_list = General_Solver.word_information(self.vocab, new_vocab_dist, new_position_dist, state)
+				for i, info in enumerate(info_list):
+					full_info_list[i][1] += info[1] * vocabs[0].shape[0]
+					# Scaling information to vocabulary size prioritizes game boards with more words to eliminate
+		
+		max_info_guesses = sorted(full_info_list, key = lambda x: x[1], reverse = True)
+		print([f"{General_Solver.to_word(w[0])}: {w[1]:.2f}" for w in max_info_guesses[0:10]])
+		new_guess = max(full_info_list, key = lambda x: x[1])
+	
+		print(new_guess[1])
+		if (self.game.current_guess_index > 0 and new_guess[1] < 4): #set a threshold of score from when we can start guessing
+			print("low score")
 			new_word_guess = General_Solver.to_word(new_guess[0])
-			print(new_word_guess)
+		else:
+			new_word_guess = General_Solver.to_word(new_guess[0])
+		print(new_word_guess)
 
-			new_enc_guesses, done, final_turns, success = self.game.advance_state(new_word_guess)
+		## break back to UI to submit guess
+		return
 
-			for i in range(self.num_game_boards):
-				self.encoded_guesses[i].append(new_enc_guesses[i])
+		# new_enc_guesses, done, final_turns, success = Quordle_Website_Game.advance_state(self, self.game, new_word_guess)
 
-		if final_turns and (not done):
-			success = self.execute_final_guesses([i for i in range(self.num_game_boards)])
+		# 	for i in range(self.num_game_boards):
+		# 		self.encoded_guesses[i].append(new_enc_guesses[i])
 
-		print("DONE")
+		# if final_turns and (not done):
+		# 	success = self.execute_final_guesses([i for i in range(self.num_game_boards)])
 
-		if self.end_with_close:
-			self.game.driver.quit()
+		# print("DONE")
 
-		return success
+		# if self.end_with_close:
+		# 	self.game.driver.quit()
+
+		# return success
 
 	def to_word(mat):
 		"""
