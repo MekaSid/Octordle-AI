@@ -3,6 +3,7 @@ import json
 import random
 from general_solver import General_Solver
 from Octordle_Website_Game import Octordle_Website_Game
+import copy
 
 class OctordleUI:
     def __init__(self, master):
@@ -60,7 +61,7 @@ class OctordleUI:
         self.feedback_array_current_guess = [[None for _ in range(5)] for _ in range(8)]
 
         # Get the guess
-        self.octordle = Octordle_Website_Game()
+        #self.octordle = Octordle_Website_Game()
         self.solver = General_Solver(game = self)
         self.solver.live_play_ultra()
 
@@ -80,7 +81,7 @@ class OctordleUI:
         print(self.feedback_array_all_guess)
         # feedback, done = self.octordle.advance_state(feedback = self.feedback_array_all_guess[0])
         #self.solver.live_play_ultra()
-        feedback = self.feedback_array_all_guess[0]
+        feedback = self.feedback_array_all_guess[self.current_guess_index - 1]
         self.solver.hi()
         self.solver.add_to_encoded_guesses(feedback)
         self.solver.live_play_ultra()
@@ -105,9 +106,10 @@ class OctordleUI:
                 correct_guess = False  # Not in the word at all
                 feedback = [char, 1]
             self.guess_labels[word_index][guess_index][i].config(text=char, bg=correct_color, fg="white")
+            #encoded guesses changing here
             self.feedback_array_current_guess[word_index][i] = feedback
             print(self.feedback_array_current_guess[word_index])
-        self.feedback_array_all_guess[guess_index] = self.feedback_array_current_guess 
+        self.feedback_array_all_guess[guess_index] = copy.deepcopy(self.feedback_array_current_guess)
         return correct_guess and guess == target_word
 
 
