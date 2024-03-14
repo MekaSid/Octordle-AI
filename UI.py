@@ -82,11 +82,13 @@ class OctordleUI:
             self.current_guess_index += 1
             if self.check_board_solved():
                 self.display_congratulations()
+                return
             elif self.current_guess_index >= 13:
                 self.display_failure()
+                return
 
         feedback = self.feedback_array_all_guess[self.current_guess_index - 1]
-        self.solver.hi()
+        #self.solver.hi()
         self.solver.add_to_encoded_guesses(feedback)
         self.solver.live_play_ultra()
 

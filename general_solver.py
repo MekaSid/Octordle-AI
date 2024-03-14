@@ -1,5 +1,6 @@
 import numpy as np, json, string
 from Quordle_Website_Game import Quordle_Website_Game
+from feedback_solver import *
 
 encoded_guesses = None
 
@@ -28,6 +29,12 @@ class General_Solver():
 		# For Optimized Performance
 		self.ultra_instinct = True
 		self.end_with_close = end_with_close
+		self.final_guess_index = 0
+
+		filepath = "five_letter_words.json"
+		with open(filepath, 'r') as file:
+			word_list = json.load(file)
+		self.word_list = word_list
 
 	def hi(self):
 		print("hi")
@@ -37,37 +44,37 @@ class General_Solver():
 			self.encoded_guesses[i].append(feedback[i])
 		return
 
-	def execute_final_guesses(self, game_boards):
-		"""
-		Recursive function.
-		Finds the highest probability final guess among available game boards,
-		guesses it, updates encoded guesses, and then repeats until
-		there are no more available game boards.
+	# def execute_final_guesses(self, game_boards):
+	# 	"""
+	# 	Recursive function.
+	# 	Finds the highest probability final guess among available game boards,
+	# 	guesses it, updates encoded guesses, and then repeats until
+	# 	there are no more available game boards.
 
-		Input: list of numbers representing the index of game boards
-		"""
+	# 	Input: list of numbers representing the index of game boards
+	# 	"""
 
-		states = [self.get_state(self.encoded_guesses[i]) for i in game_boards]
-		vocabs = [General_Solver.vocab_filter_total(s, self.vocab, self.pos_vocab) for s in states]
-		curr = np.argmin([v[0].shape[0] for v in vocabs])
-		game_boards.pop(curr)
-		vocab_dist = General_Solver.get_vocab_distribution(vocabs[curr][0])
-		pos_dist = General_Solver.get_vocab_distribution(vocabs[curr][1])
-		info_list = General_Solver.word_information(vocabs[curr][0], vocab_dist, pos_dist, states[curr])
-		new_guess = max(info_list, key = lambda x: x[1])
-		max_info_guesses = sorted(info_list, key = lambda x: x[1], reverse = True)
-		print([f"{General_Solver.to_word(w[0])}: {w[1]:.2f}" for w in max_info_guesses[0:10]])
-		new_word_guess = General_Solver.to_word(new_guess[0])
-		print(new_word_guess)
-		new_enc_guesses, _, _, success = self.game.advance_state(new_word_guess)
+	# 	states = [self.get_state(self.encoded_guesses[i]) for i in game_boards]
+	# 	vocabs = [General_Solver.vocab_filter_total(s, self.vocab, self.pos_vocab) for s in states]
+	# 	curr = np.argmin([v[0].shape[0] for v in vocabs])
+	# 	game_boards.pop(curr)
+	# 	vocab_dist = General_Solver.get_vocab_distribution(vocabs[curr][0])
+	# 	pos_dist = General_Solver.get_vocab_distribution(vocabs[curr][1])
+	# 	info_list = General_Solver.word_information(vocabs[curr][0], vocab_dist, pos_dist, states[curr])
+	# 	new_guess = max(info_list, key = lambda x: x[1])
+	# 	max_info_guesses = sorted(info_list, key = lambda x: x[1], reverse = True)
+	# 	print([f"{General_Solver.to_word(w[0])}: {w[1]:.2f}" for w in max_info_guesses[0:10]])
+	# 	new_word_guess = General_Solver.to_word(new_guess[0])
+	# 	print(new_word_guess)
+	# 	new_enc_guesses, _, _, success = self.game.advance_state(new_word_guess)
 
-		for i in range(self.num_game_boards):
-			self.encoded_guesses[i].append(new_enc_guesses[i])
+	# 	for i in range(self.num_game_boards):
+	# 		self.encoded_guesses[i].append(new_enc_guesses[i])
 
-		if len(game_boards) == 0:
-			return success
+	# 	if len(game_boards) == 0:
+	# 		return success
 
-		self.execute_final_guesses(game_boards)
+	# 	self.execute_final_guesses(game_boards)
 
 	def live_play_ultra(self):
 		"""
@@ -119,13 +126,17 @@ class General_Solver():
 		print([f"{General_Solver.to_word(w[0])}: {w[1]:.2f}" for w in max_info_guesses[0:10]])
 		new_guess = max(full_info_list, key = lambda x: x[1])
 	
-		print(new_guess[1])
-		if (self.game.current_guess_index > 0 and new_guess[1] < 4): #set a threshold of score from when we can start guessing
+		if (self.game.current_guess_index > 0 and new_guess[1] < 10): #set a threshold of score from when we can start guessing
 			print("low score")
-			new_word_guess = General_Solver.to_word(new_guess[0])
+			for i in range(0, 8):
+				best_word = find_best_words(self.encoded_guesses[i], self.word_list)
+				print(f"{best_word} for board {i+1}")
+			# best_word = find_best_word(self.encoded_guesses[self.final_guess_index], self.word_list)
+			# print(f"{best_word} for board {self.final_guess_index + 1}")
+			# self.final_guess_index += 1
 		else:
 			new_word_guess = General_Solver.to_word(new_guess[0])
-		print(new_word_guess)
+			print(new_word_guess)
 
 		## break back to UI to submit guess
 		return
