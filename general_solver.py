@@ -32,6 +32,8 @@ class General_Solver():
 		self.final_guess_index = 0
 
 		filepath = "answers.txt"
+
+		self.guessed_words = []
 		# with open(filepath, 'r') as file:
 		# 	word_list = json.load(file)
 		# self.word_list = word_list
@@ -135,20 +137,25 @@ class General_Solver():
 		# 	# print(f"{best_word} for board {self.final_guess_index + 1}")
 		# 	# self.final_guess_index += 1
 		# else:
-		start = False
+		#start = False
 		for i in range(0, 8):
 			best_word = find_best_words(self.encoded_guesses[i], self.word_list)
-			if(len(best_word) <= 2):
-				if start == False:
-					print("Guessing Algorithm Word Guesses")
-					start = True
-				print(f"{best_word} for board {i+1}")
-		if (self.game.current_guess_index == 0 or new_guess[1] >= 0):
-			new_word_guess = General_Solver.to_word(new_guess[0])
-			print("Information Algorithm Word Guess:", new_word_guess, "\n")
+			if(len(best_word) == 1):
+				if best_word[0] not in self.guessed_words:
+					self.guessed_words.append(best_word[0])
+					return best_word[0]
+		# if (self.game.current_guess_index == 0 or new_guess[1] >= 0 or new_guess[1] == "nan"):
+		new_word_guess = General_Solver.to_word(new_guess[0])
+			#print("Information Algorithm Word Guess:", new_word_guess, "\n")
 
+		
 		## break back to UI to submit guess
-		return
+		# for guess in temp:
+		# 	if guess not in best_word:
+		# 			return temp
+
+# If all guesses in temp are repeated, return new_word_guess
+		return new_word_guess
 
 		# new_enc_guesses, done, final_turns, success = Quordle_Website_Game.advance_state(self, self.game, new_word_guess)
 
@@ -218,7 +225,7 @@ class General_Solver():
 		"""
 		with open(dict_path, "r") as words_read:
 			words = json.load(words_read)
-
+		#answer.txt file here
 		encoded_words = []
 
 		for w in words:
