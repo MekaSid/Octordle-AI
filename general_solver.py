@@ -16,6 +16,7 @@ class General_Solver():
 
 		self.debug = debug
 
+		self.num_guess_words = 0
 		global encoded_guesses
 		self.encoded_guesses = [[] for i in range(num_game_boards)]
 		
@@ -142,9 +143,13 @@ class General_Solver():
 			best_word = find_best_words(self.encoded_guesses[i], self.word_list)
 			if(len(best_word) == 1):
 				if best_word[0] not in self.guessed_words:
+					self.num_guess_words += 1
 					self.guessed_words.append(best_word[0])
 					return best_word[0]
 		# if (self.game.current_guess_index == 0 or new_guess[1] >= 0 or new_guess[1] == "nan"):
+			elif self.num_guess_words == 7:
+				self.num_guess_words += 1
+				return best_word[0]
 		new_word_guess = General_Solver.to_word(new_guess[0])
 			#print("Information Algorithm Word Guess:", new_word_guess, "\n")
 
