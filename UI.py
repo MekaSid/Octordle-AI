@@ -25,7 +25,6 @@ class OctordleUI:
         # Track the current guess index and which boards are solved
         self.current_guess_index = 0
         self.solved_boards = [False] * len(self.target_words)
-
         # Set the size of the window
         master.geometry('1280x800')
 

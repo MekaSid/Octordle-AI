@@ -31,10 +31,13 @@ class General_Solver():
 		self.end_with_close = end_with_close
 		self.final_guess_index = 0
 
-		filepath = "five_letter_words.json"
+		filepath = "answers.txt"
+		# with open(filepath, 'r') as file:
+		# 	word_list = json.load(file)
+		# self.word_list = word_list
+
 		with open(filepath, 'r') as file:
-			word_list = json.load(file)
-		self.word_list = word_list
+			self.word_list = file.read().splitlines()
 
 	def hi(self):
 		print("hi")
@@ -126,15 +129,20 @@ class General_Solver():
 		print([f"{General_Solver.to_word(w[0])}: {w[1]:.2f}" for w in max_info_guesses[0:10]])
 		new_guess = max(full_info_list, key = lambda x: x[1])
 	
-		if (self.game.current_guess_index > 0 and new_guess[1] < 10): #set a threshold of score from when we can start guessing
-			print("low score")
-			for i in range(0, 8):
-				best_word = find_best_words(self.encoded_guesses[i], self.word_list)
+		# if (self.game.current_guess_index > 0 and new_guess[1] < 10): #set a threshold of score from when we can start guessing
+		# 	print("low score")
+		# 	for i in range(0, 8):
+		# 		best_word = find_best_words(self.encoded_guesses[i], self.word_list)
+		# 		print(f"{best_word} for board {i+1}")
+		# 	# best_word = find_best_word(self.encoded_guesses[self.final_guess_index], self.word_list)
+		# 	# print(f"{best_word} for board {self.final_guess_index + 1}")
+		# 	# self.final_guess_index += 1
+		# else:
+		for i in range(0, 8):
+			best_word = find_best_words(self.encoded_guesses[i], self.word_list)
+			if(len(best_word) <= 2):
 				print(f"{best_word} for board {i+1}")
-			# best_word = find_best_word(self.encoded_guesses[self.final_guess_index], self.word_list)
-			# print(f"{best_word} for board {self.final_guess_index + 1}")
-			# self.final_guess_index += 1
-		else:
+		if (self.game.current_guess_index == 0 or new_guess[1] >= 0):
 			new_word_guess = General_Solver.to_word(new_guess[0])
 			print(new_word_guess)
 
