@@ -36,7 +36,7 @@ class OctordleUI:
         for index, frame in enumerate(self.frames):
             frame.grid(row=1, column=index * 2, padx=(5, 0), pady=5, sticky="nsew")
             if index < 7:  # Add separators between sections but not after the last one
-                separator = tk.Frame(master, width=2, height=600, bg="black")
+                separator = tk.Frame(master, width=2, height=400, bg="black")
                 separator.grid(row=1, column=index * 2 + 1, sticky="ns")
 
         # Create labels for guesses in each frame
