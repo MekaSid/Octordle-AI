@@ -39,9 +39,6 @@ class General_Solver():
 		with open(filepath, 'r') as file:
 			self.word_list = file.read().splitlines()
 
-	def hi(self):
-		print("hi")
-
 	def add_to_encoded_guesses(self, feedback):
 		for i in range(self.num_game_boards):
 			self.encoded_guesses[i].append(feedback[i])
@@ -107,11 +104,11 @@ class General_Solver():
 			position_dist = General_Solver.get_position_distribution(vocabs[1])
 			new_vocab_dist = vocab_dist * zero_out_states[0]
 			new_position_dist = position_dist * zero_out_states[1]
-			print(vocabs[0].shape)
+			#print(vocabs[0].shape)
 			full_info_list = General_Solver.word_information(self.vocab, new_vocab_dist, new_position_dist, state)
 		else:
 			for i in range(self.num_game_boards):
-				print(i)
+				#print(i)
 				state = self.get_state(self.encoded_guesses[i])
 				vocabs = General_Solver.vocab_filter_total(state, self.vocab, self.pos_vocab)
 				zero_out_states = General_Solver.get_zero_out_state(state)
@@ -119,14 +116,14 @@ class General_Solver():
 				position_dist = General_Solver.get_position_distribution(vocabs[1])
 				new_vocab_dist = vocab_dist * zero_out_states[0]
 				new_position_dist = position_dist * zero_out_states[1]
-				print(vocabs[0].shape)
+				#print(vocabs[0].shape)
 				info_list = General_Solver.word_information(self.vocab, new_vocab_dist, new_position_dist, state)
 				for i, info in enumerate(info_list):
 					full_info_list[i][1] += info[1] * vocabs[0].shape[0]
 					# Scaling information to vocabulary size prioritizes game boards with more words to eliminate
 		
 		max_info_guesses = sorted(full_info_list, key = lambda x: x[1], reverse = True)
-		print([f"{General_Solver.to_word(w[0])}: {w[1]:.2f}" for w in max_info_guesses[0:10]])
+		#print([f"{General_Solver.to_word(w[0])}: {w[1]:.2f}" for w in max_info_guesses[0:10]])
 		new_guess = max(full_info_list, key = lambda x: x[1])
 	
 		# if (self.game.current_guess_index > 0 and new_guess[1] < 10): #set a threshold of score from when we can start guessing
@@ -138,13 +135,17 @@ class General_Solver():
 		# 	# print(f"{best_word} for board {self.final_guess_index + 1}")
 		# 	# self.final_guess_index += 1
 		# else:
+		start = False
 		for i in range(0, 8):
 			best_word = find_best_words(self.encoded_guesses[i], self.word_list)
 			if(len(best_word) <= 2):
+				if start == False:
+					print("Guessing Algorithm Word Guesses")
+					start = True
 				print(f"{best_word} for board {i+1}")
 		if (self.game.current_guess_index == 0 or new_guess[1] >= 0):
 			new_word_guess = General_Solver.to_word(new_guess[0])
-			print(new_word_guess)
+			print("Information Algorithm Word Guess:", new_word_guess, "\n")
 
 		## break back to UI to submit guess
 		return

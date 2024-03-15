@@ -16,7 +16,7 @@ class OctordleUI:
             self.target_words = file.read().splitlines()
 
         self.target_words = random.sample(self.target_words, 8)
-        print(self.target_words)
+        #print(self.target_words)
 
         # Define target words for testing
         # self.target_words = ["APPLE", "BERRY", "CHERR", "DATES", "ELDER", "FIGGY", "GRAPE", "HONEY"]
@@ -108,7 +108,6 @@ class OctordleUI:
                 correct_guess = False  # Not in the word at all
                 feedback = [char, 1]
             self.guess_labels[word_index][guess_index][i].config(text=char, bg=correct_color, fg="white")
-            #encoded guesses changing here
             self.feedback_array_current_guess[word_index][i] = feedback
         self.feedback_array_all_guess[guess_index] = copy.deepcopy(self.feedback_array_current_guess)
         return correct_guess and guess == target_word
