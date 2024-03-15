@@ -5,7 +5,7 @@ from Octordle_Website_Game import Octordle_Website_Game
 import copy
 import time
 
-class OctordleUI:
+class OctordleUI:   
     def __init__(self, master):
         self.master = master
         master.title('Octordle Game')
@@ -16,6 +16,7 @@ class OctordleUI:
             self.target_words = file.read().splitlines()
 
         self.target_words = random.sample(self.target_words, 8)
+        #self.target_words = ["woman", "navel", "bison", "modem", "rivet", "crate", "lorry", "fanny"]
 
         self.target_words = [word.upper() for word in self.target_words]
         self.current_guess_index = 0
