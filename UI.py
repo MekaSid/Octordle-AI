@@ -1,28 +1,30 @@
 import tkinter as tk
 import random
 from general_solver import General_Solver
-from Octordle_Website_Game import Octordle_Website_Game
 import copy
 import time
 
-class OctordleUI:   
+class OctordleUI:
     def __init__(self, master):
         self.master = master
         master.title('Octordle Game')
 
         file_path = 'answers.txt'
-
         with open(file_path, 'r') as file:
             self.target_words = file.read().splitlines()
 
-        self.target_words = random.sample(self.target_words, 8)
-        #self.target_words = ["woman", "navel", "bison", "modem", "rivet", "crate", "lorry", "fanny"]
-
+        #generate random 8 target words
+        self.target_words = random.sample(self.target_words, 8) 
+  
         self.target_words = [word.upper() for word in self.target_words]
         self.current_guess_index = 0
         self.solved_boards = [False] * len(self.target_words)
         master.geometry('1280x800')
         self.colors = {"correct": "#538d4e", "present": "#b59f3b", "absent": "#3a3a3c"}
+
+        # Create label for "Octordle" text
+        octordle_label = tk.Label(master, text="Octordle", font=('Helvetica', 40))
+        octordle_label.grid(row=0, column=5, columnspan=5, pady=(10, 5))
 
         self.frames = [tk.Frame(master, width=100, height=600) for _ in range(8)]
         for index, frame in enumerate(self.frames):
@@ -37,12 +39,6 @@ class OctordleUI:
             for guess_index, row in enumerate(frame_labels):
                 for letter_index, label in enumerate(row):
                     label.grid(row=guess_index, column=letter_index, padx=2, pady=2)
-
-        self.input_field = tk.Entry(master, width=10, font=('Helvetica', 16))
-        self.input_field.grid(row=0, column=0, columnspan=8, padx=5, pady=5)
-
-        self.submit_button = tk.Button(master, text="Submit Guess", command=self.submit_guess, font=('Helvetica', 14))
-        self.submit_button.grid(row=0, column=8, columnspan=2, padx=5, pady=5)
 
         self.feedback_array_all_guess = [None for _ in range(13)]
         self.feedback_array_current_guess = [[None for _ in range(5)] for _ in range(8)]
@@ -119,8 +115,6 @@ class OctordleUI:
         # Create a label to display the target words
         target_words_label = tk.Label(self.master, text="Target Words: " + ", ".join(self.target_words), font=('Helvetica', 16))
         target_words_label.grid(row=6, column=0, columnspan=20, sticky="nsew")
-
-
 
 root = tk.Tk()
 app = OctordleUI(root)
