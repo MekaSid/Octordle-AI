@@ -22,7 +22,7 @@ pip install numpy
 ```
 
 
-### Playing Octordle
+## Playing Octordle
 
 To play Octordle with the AI agent, please follow these instructions:
 
@@ -34,9 +34,10 @@ python UI.py
 The AI agent will play the game automatically, and the process will take approximately 1 minute to complete.
 
 
-3. Results
+## Results
 
 Since there's no automated validation process available, the algorithm's performance was assessed by running Octordle manually 100 times. Here are the results:
 
 <img src="results.png" alt="Results" width="50%" height="50%">
 
+As observed from the results, the AI agent is able to solve the game in approximately 11.45 guesses on average.
