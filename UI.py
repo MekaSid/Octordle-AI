@@ -46,7 +46,7 @@ class OctordleUI:
         self.guess_word = None
 
         self.solver = General_Solver(game=self)
-        self.guess_word = self.solver.live_play_ultra()
+        self.guess_word = self.solver.octordle_solver()
 
         self.start_automatic_guessing()
 
@@ -75,7 +75,7 @@ class OctordleUI:
 
         feedback = self.feedback_array_all_guess[self.current_guess_index - 1]
         self.solver.add_to_encoded_guesses(feedback)
-        self.guess_word = self.solver.live_play_ultra()
+        self.guess_word = self.solver.octordle_solver()
 
     def update_guess(self, word_index, guess_index, guess, target_word):
         target_word = target_word.lower()

@@ -43,12 +43,12 @@ class General_Solver():
 			self.encoded_guesses[i].append(feedback[i])
 		return
 
-	def live_play_ultra(self):
+	def octordle_solver(self):
 		"""
 		This method utilizes an optimized strategy to make guesses in the Octordle game based on the current state of the game.
 
 		Returns:
-		str: The word guessed by the AI agent.
+		str: The word guessed by the agent.
 		"""
 
 		# Initialize a list to store word information and initialize all values to 0.0
