@@ -38,5 +38,5 @@ The AI agent will play the game automatically, and the process will take approxi
 
 Since there's no automated validation process available, the algorithm's performance was assessed by running Octordle 100 times. Here are the results:
 
-![Results](results.png){width=50% height=50%}
+<img src="results.png" alt="Results" width="50%" height="50%">
 
