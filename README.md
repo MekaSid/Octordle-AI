@@ -38,5 +38,5 @@ The AI agent will play the game automatically, and the process will take approxi
 
 Since there's no automated validation process available, the algorithm's performance was assessed by running Octordle 100 times. Here are the results:
 
-![Results](https://file%2B.vscode-resource.vscode-cdn.net/var/folders/7h/68jc6ngd1yg55vr00gflfwym0000gn/T/TemporaryItems/NSIRD_screencaptureui_tU7Dkd/Screen%20Shot%202024-03-18%20at%203.59.00%20AM.png?version%3D1710759556871)
+![Results](images/results.png)
 
