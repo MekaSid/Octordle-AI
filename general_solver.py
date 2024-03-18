@@ -1,5 +1,4 @@
 import numpy as np, json, string
-from Quordle_Website_Game import Quordle_Website_Game
 from feedback_solver import *
 
 encoded_guesses = None
@@ -32,12 +31,9 @@ class General_Solver():
 		self.end_with_close = end_with_close
 		self.final_guess_index = 0
 
-		filepath = "answers.txt"
-
 		self.guessed_words = []
-		# with open(filepath, 'r') as file:
-		# 	word_list = json.load(file)
-		# self.word_list = word_list
+
+		filepath = "answers.txt"
 
 		with open(filepath, 'r') as file:
 			self.word_list = file.read().splitlines()
@@ -47,135 +43,74 @@ class General_Solver():
 			self.encoded_guesses[i].append(feedback[i])
 		return
 
-	# def execute_final_guesses(self, game_boards):
-	# 	"""
-	# 	Recursive function.
-	# 	Finds the highest probability final guess among available game boards,
-	# 	guesses it, updates encoded guesses, and then repeats until
-	# 	there are no more available game boards.
-
-	# 	Input: list of numbers representing the index of game boards
-	# 	"""
-
-	# 	states = [self.get_state(self.encoded_guesses[i]) for i in game_boards]
-	# 	vocabs = [General_Solver.vocab_filter_total(s, self.vocab, self.pos_vocab) for s in states]
-	# 	curr = np.argmin([v[0].shape[0] for v in vocabs])
-	# 	game_boards.pop(curr)
-	# 	vocab_dist = General_Solver.get_vocab_distribution(vocabs[curr][0])
-	# 	pos_dist = General_Solver.get_vocab_distribution(vocabs[curr][1])
-	# 	info_list = General_Solver.word_information(vocabs[curr][0], vocab_dist, pos_dist, states[curr])
-	# 	new_guess = max(info_list, key = lambda x: x[1])
-	# 	max_info_guesses = sorted(info_list, key = lambda x: x[1], reverse = True)
-	# 	print([f"{General_Solver.to_word(w[0])}: {w[1]:.2f}" for w in max_info_guesses[0:10]])
-	# 	new_word_guess = General_Solver.to_word(new_guess[0])
-	# 	print(new_word_guess)
-	# 	new_enc_guesses, _, _, success = self.game.advance_state(new_word_guess)
-
-	# 	for i in range(self.num_game_boards):
-	# 		self.encoded_guesses[i].append(new_enc_guesses[i])
-
-	# 	if len(game_boards) == 0:
-	# 		return success
-
-	# 	self.execute_final_guesses(game_boards)
-
 	def live_play_ultra(self):
 		"""
-		Trish will play Wordle Game live in ultra instinct mode,
-		with optimized gameplay and automatic reading and writing.
-		Variable ultra_instinct must be True to allow this mode.
+		This method utilizes an optimized strategy to make guesses in the Octordle game based on the current state of the game.
 
-		Modes:
-		o - ultra_instinct
-		o - debug
-
+		Returns:
+		str: The word guessed by the AI agent.
 		"""
-		final_turns = False
-		done = False
-		#while (not final_turns) and (not done):
 
-		if self.debug:
-			inp = input("Continue")
-
+		# Initialize a list to store word information and initialize all values to 0.0
 		full_info_list = [[v, 0.0] for v in self.vocab]
 
+		# If it's the first guess, calculate word information based on the initial game state
 		if self.game.current_guess_index == 0:
-			state = self.get_state(self.encoded_guesses[0])
+			state = self.get_state(self.encoded_guesses[0])  # Get the current game state
+			# Filter the vocabulary based on the current game state
 			vocabs = General_Solver.vocab_filter_total(state, self.vocab, self.pos_vocab)
+			# Get the distribution of vocabulary and positions after filtering
 			zero_out_states = General_Solver.get_zero_out_state(state)
 			vocab_dist = General_Solver.get_vocab_distribution(vocabs[0])
 			position_dist = General_Solver.get_position_distribution(vocabs[1])
+			# Update vocabulary and position distributions with zeroed-out states
 			new_vocab_dist = vocab_dist * zero_out_states[0]
 			new_position_dist = position_dist * zero_out_states[1]
-			#print(vocabs[0].shape)
+			# Calculate word information based on the updated distributions
 			full_info_list = General_Solver.word_information(self.vocab, new_vocab_dist, new_position_dist, state)
 		else:
+			# For subsequent guesses, calculate word information for each game board
 			for i in range(self.num_game_boards):
-				#print(i)
-				state = self.get_state(self.encoded_guesses[i])
+				state = self.get_state(self.encoded_guesses[i])  # Get the current game state
+				# Filter the vocabulary based on the current game state
 				vocabs = General_Solver.vocab_filter_total(state, self.vocab, self.pos_vocab)
+				# Get the distribution of vocabulary and positions after filtering
 				zero_out_states = General_Solver.get_zero_out_state(state)
 				vocab_dist = General_Solver.get_vocab_distribution(vocabs[0])
 				position_dist = General_Solver.get_position_distribution(vocabs[1])
+				# Update vocabulary and position distributions with zeroed-out states
 				new_vocab_dist = vocab_dist * zero_out_states[0]
 				new_position_dist = position_dist * zero_out_states[1]
-				#print(vocabs[0].shape)
+				# Calculate word information based on the updated distributions
 				info_list = General_Solver.word_information(self.vocab, new_vocab_dist, new_position_dist, state)
+				# Update the total information for each word in the full_info_list
 				for i, info in enumerate(info_list):
-					full_info_list[i][1] += info[1] * vocabs[0].shape[0]
-					# Scaling information to vocabulary size prioritizes game boards with more words to eliminate
-		
-		max_info_guesses = sorted(full_info_list, key = lambda x: x[1], reverse = True)
-		#print([f"{General_Solver.to_word(w[0])}: {w[1]:.2f}" for w in max_info_guesses[0:10]])
-		new_guess = max(full_info_list, key = lambda x: x[1])
-	
-		# if (self.game.current_guess_index > 0 and new_guess[1] < 10): #set a threshold of score from when we can start guessing
-		# 	print("low score")
-		# 	for i in range(0, 8):
-		# 		best_word = find_best_words(self.encoded_guesses[i], self.word_list)
-		# 		print(f"{best_word} for board {i+1}")
-		# 	# best_word = find_best_word(self.encoded_guesses[self.final_guess_index], self.word_list)
-		# 	# print(f"{best_word} for board {self.final_guess_index + 1}")
-		# 	# self.final_guess_index += 1
-		# else:
-		#start = False
+					full_info_list[i][1] += info[1] * vocabs[0].shape[0]  # Scale information to prioritize game boards with more words to eliminate
+
+		# Sort the list of word information based on the total information
+		max_info_guesses = sorted(full_info_list, key=lambda x: x[1], reverse=True)
+		# Select the word with the highest total information as the new guess
+		new_guess = max(full_info_list, key=lambda x: x[1])
+
+		# Loop through the game boards to find the best word to guess
 		for i in range(0, 8):
-			best_word = find_best_words(self.encoded_guesses[i], self.word_list)
-			if(len(best_word) == 1):
+			best_word = find_best_words(self.encoded_guesses[i], self.word_list, self.guessed_words)
+			# If there is only one possible word to guess, select it
+			if len(best_word) == 1:
 				if best_word[0] not in self.guessed_words:
 					self.num_guess_words += 1
 					self.guessed_words.append(best_word[0])
 					return best_word[0]
-		# if (self.game.current_guess_index == 0 or new_guess[1] >= 0 or new_guess[1] == "nan"):
-			elif self.num_guess_words == 7:
-				self.num_guess_words += 1
+			# If the new guess provides no information and there are words available to guess, take a chance
+			elif new_guess[1] == 0 and self.game.current_guess_index > 0 and len(best_word) > 0:
+				self.guessed_words.append(best_word[0])
 				return best_word[0]
+
+		# Convert the one-hot encoded guess to a word and append it to the guessed words list
 		new_word_guess = General_Solver.to_word(new_guess[0])
-			#print("Information Algorithm Word Guess:", new_word_guess, "\n")
-
-		
-		## break back to UI to submit guess
-		# for guess in temp:
-		# 	if guess not in best_word:
-		# 			return temp
-
-# If all guesses in temp are repeated, return new_word_guess
+		self.guessed_words.append(new_word_guess)
 		return new_word_guess
 
-		# new_enc_guesses, done, final_turns, success = Quordle_Website_Game.advance_state(self, self.game, new_word_guess)
-
-		# 	for i in range(self.num_game_boards):
-		# 		self.encoded_guesses[i].append(new_enc_guesses[i])
-
-		# if final_turns and (not done):
-		# 	success = self.execute_final_guesses([i for i in range(self.num_game_boards)])
-
-		# print("DONE")
-
-		# if self.end_with_close:
-		# 	self.game.driver.quit()
-
-		# return success
 
 	def to_word(mat):
 		"""
@@ -452,9 +387,3 @@ class General_Solver():
 				pos_vocab = pos_vocab[indices]
 		return vocab, pos_vocab
 	
-
-if __name__ == "__main__":
-	dict_path = "/Users/yashwant/Library/Mobile Documents/com~apple~CloudDocs/yash_icloud/CSC 480/Wordle/five_letter_words.json"
-	trisha = General_Solver(dict_path, daily = True)
-	trisha.live_play_ultra()
-
