@@ -8,7 +8,7 @@ This project is developed as part of the CSC 480 course at Cal Poly, under the s
 
 ## Credits
 
-- The information algorithm used for solving Octordle is based on the General Solver library by [Nuo Wen Lei](https://github.com/NuoWenLei/Wordle_Solver).
+- The information algorithm used for solving Octordle draws inspiration from the General Solver script (general_solver.py) by [Nuo Wen Lei](https://github.com/NuoWenLei/Wordle_Solver).
 - The user interface for playing Octordle is built using the tkinter library in Python.
 
 ## Installation
