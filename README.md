@@ -2,12 +2,6 @@
 
 # Team Members -  Akhil Elamanchili, Yashwant Sathish Kumar, Sid Meka, Riley Froomin, Krishan Patel
 
-Here's a template for the README file based on your project requirements:
-
----
-
-# Octordle AI Project
-
 ## Acknowledgments
 
 This project is developed as part of the CSC 480 course at Cal Poly, under the supervision of Dr. Rodrigo Canaan
