@@ -18,7 +18,7 @@ To run this project, you need to have Python installed on your system.
 1. Install the required dependencies:
 
 ```
-pip library requirements: numpy
+pip install numpy
 ```
 
 
